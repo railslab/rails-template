@@ -121,6 +121,7 @@ def dev_route
 
   mirror 'app/controllers/dev_controller.rb',
          'app/views/dev/form.html.erb',
+         'app/views/dev/pagination.html.slim',
          'app/views/layouts/dev.html.erb'
 end
 
@@ -138,7 +139,7 @@ def simple_form
 end
 
 def gem_nprogress_rails
-  gem 'nprogress-rails'
+  gem 'nprogress-rails' # https://github.com/caarlos0/nprogress-rails
 
   insert_into_file 'app/assets/javascripts/application.js', after: "//= require turbolinks\n" do
     "//= require nprogress\n" +
@@ -149,4 +150,10 @@ def gem_nprogress_rails
     " *= require nprogress\n" +
     " *= require nprogress-bootstrap\n"
   end
+end
+
+def gem_kaminari
+  gem 'kaminari'
+  gem 'kaminari-i18n'
+  generate *%w(kaminari:views bootstrap3 -e slim)
 end

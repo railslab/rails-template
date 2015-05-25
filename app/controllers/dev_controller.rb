@@ -21,6 +21,10 @@ class DevController < ActionController::Base
     @model = DevModel.new(params[:dev_model])
     @model.validate if request.post?
   end
+
+  def pagination
+    @items = Kaminari.paginate_array((1..90).to_a).page(params[:page]).per(10)
+  end
 end
 
 class DevModel
