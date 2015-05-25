@@ -56,3 +56,4 @@ group :development do
 end
 
 gem 'slim-rails'
+gem 'email_validator'
