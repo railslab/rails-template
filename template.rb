@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :remove_sqlit3_from_production
+run_commit :timezone_brasilia
 
 exit
 
