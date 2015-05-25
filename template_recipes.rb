@@ -12,13 +12,26 @@ def add_ruby_version_to_gemfile
                    after: /source .+\n/
 end
 
+def tools
+  gem_group :development do
+    gem 'thin'
+    gem 'bump',                 require: false # https://github.com/gregorym/bump#usage
+    gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
+    gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
+    gem 'overcommit',           require: false # https://github.com/brigade/overcommit
+    gem 'did_you_mean'                         # https://github.com/yuki24/did_you_mean#nomethoderror
+    gem 'guard-livereload',     require: false # https://github.com/guard/guard-livereload#install
+    gem 'rails_best_practices', require: false # https://github.com/railsbp/rails_best_practices
+    # gem 'rubocop-select',     require: false # https://github.com/packsaddle/rubocop-select
+  end
+
+  mirror '.rubocop.yml'
+  mirror '.overcommit.yml'
+end
+
 def gem_lograge
   gem 'lograge'
   application 'config.lograge.enabled = true'
-end
-
-def gem_thin_on_dev
-  tool 'thin'
 end
 
 def gem_slim
@@ -95,22 +108,6 @@ end
 
 def inflections
   mirror 'config/initializers/inflections.rb'
-end
-
-def tools
-  gem_group :development do
-    gem 'bump',                 require: false # https://github.com/gregorym/bump#usage
-    gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
-    gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
-    gem 'overcommit',           require: false # https://github.com/brigade/overcommit
-    gem 'did_you_mean'                         # https://github.com/yuki24/did_you_mean#nomethoderror
-    gem 'guard-livereload',     require: false # https://github.com/guard/guard-livereload#install
-    gem 'rails_best_practices', require: false # https://github.com/railsbp/rails_best_practices
-    # gem 'rubocop-select',     require: false # https://github.com/packsaddle/rubocop-select
-  end
-
-  mirror '.rubocop.yml'
-  mirror '.overcommit.yml'
 end
 
 def dev_route

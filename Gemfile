@@ -43,3 +43,14 @@ group :development, :test do
   gem 'spring'
 end
 
+
+group :development do
+  gem 'thin'
+  gem 'bump', require: false
+  gem 'rubocop', require: false
+  gem 'brakeman', require: false
+  gem 'overcommit', require: false
+  gem 'did_you_mean'
+  gem 'guard-livereload', require: false
+  gem 'rails_best_practices', require: false
+end

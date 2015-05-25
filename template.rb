@@ -1,12 +1,12 @@
 require_relative './template_recipes'
 
-run_commit :add_ruby_version_to_gemfile
+run_commit :tools
 
 exit
 
 run_commit :git_init,
            :add_ruby_version_to_gemfile,
-           :gem_thin_on_dev,
+           :tools,
            :gem_slim,
            :gem_extras,
            :remove_sqlit3_from_production,
@@ -19,7 +19,6 @@ run_commit :git_init,
            :metatags,
            :heroku,
            :inflections,
-           :tools,
            :dev_route,
            :bootstrap,
            :simple_form
