@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :default_locale_br
+run_commit :raise_unpermitted_parameters_on_dev
 
 exit
 
