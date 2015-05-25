@@ -48,8 +48,11 @@ group :development do
   gem 'bump', require: false
   gem 'rubocop', require: false
   gem 'brakeman', require: false
+  gem 'annotate'
   gem 'overcommit', require: false
   gem 'did_you_mean'
+  gem 'meta_request'
+  gem 'rails_db_info'
   gem 'guard-livereload', require: false
   gem 'rails_best_practices', require: false
 end
@@ -65,3 +68,5 @@ end
 
 gem 'bootstrap-sass'
 gem 'simple_form'
+
+gem 'lograge'

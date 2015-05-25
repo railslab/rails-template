@@ -19,8 +19,12 @@ def tools
     gem 'bump',                 require: false # https://github.com/gregorym/bump#usage
     gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
     gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
+    gem 'annotate'                             # https://github.com/ctran/annotate_models
     gem 'overcommit',           require: false # https://github.com/brigade/overcommit
-    gem 'did_you_mean'                         # https://github.com/yuki24/did_you_mean#nomethoderror
+    gem 'did_you_mean'
+    # http://guides.rubyonrails.org/debugging_rails_applications.html
+    gem 'meta_request' # logger.debug          # https://github.com/dejan/rails_panel
+    gem 'rails_db_info' # GET /rails/info/db   # https://github.com/yuki24/did_you_mean#nomethoderror
     gem 'guard-livereload',     require: false # https://github.com/guard/guard-livereload#install
     gem 'rails_best_practices', require: false # https://github.com/railsbp/rails_best_practices
     # gem 'rubocop-select',     require: false # https://github.com/packsaddle/rubocop-select
@@ -28,6 +32,8 @@ def tools
 
   mirror '.rubocop.yml'
   mirror '.overcommit.yml'
+  mirror 'lib/tasks/auto_annotate_models.rake'
+  mirror 'lib/tasks/reset_counter_cache.rake'
 end
 
 def gem_lograge

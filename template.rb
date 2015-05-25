@@ -1,12 +1,13 @@
 require_relative './template_recipes'
 
-run_commit :inflections, :dev_route, :bootstrap, :simple_form
+run_commit ENV['RECIPE'] if ENV['RECIPE']
 
 exit
 
 run_commit :git_init,
            :add_ruby_version_to_gemfile,
            :tools,
+           :gem_lograge,
            :gem_slim,
            :gem_extras,
            :remove_sqlit3_from_production,
