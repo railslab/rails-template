@@ -1,0 +1,116 @@
+AllCops:
+  RunRailsCops: false
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  StyleGuideCopsOnly: false
+  Exclude:
+    - db/**/*
+    - bin/*
+
+# Configuration parameters: AllowSafeAssignment.
+Lint/AssignmentInCondition:
+  Enabled: true
+  Exclude:
+    - bin/spring
+
+# Cop supports --auto-correct.
+Style/BlockComments:
+  Enabled: true
+  Exclude:
+    - spec/spec_helper.rb
+
+# Cop supports --auto-correct.
+Lint/UnusedBlockArgument:
+  Enabled: true
+  Exclude:
+    - config/initializers/bower_rails.rb
+
+Lint/HandleExceptions:
+  Enabled: true
+  Exclude:
+    - bin/rails
+    - bin/rake
+
+# Configuration parameters: MinBodyLength.
+Style/GuardClause:
+  MinBodyLength: 2
+
+# Cop supports --auto-correct.
+Style/NumericLiterals:
+  Enabled: true
+  Exclude:
+    - db/schema.rb
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/BracesAroundHashParameters:
+  Enabled: true
+  AutoCorrect: false
+
+# dificil de arrumar
+Metrics/AbcSize:
+  Enabled: false
+
+# Configuration parameters: CountComments.
+Metrics/MethodLength:
+  Max: 12
+
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles, ProceduralMethods, FunctionalMethods, IgnoredMethods.
+Style/BlockDelimiters:
+  Enabled: true
+  Exclude:
+    - spec/controllers/**/*
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/EmptyLinesAroundBlockBody:
+  Exclude:
+    - spec/**/*
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
+Style/SpaceInsideBlockBraces:
+  Enabled: false
+  EnforcedStyle: no_space
+  SpaceBeforeBlockParameters: false
+
+Style/Documentation:
+  Enabled: false
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SupportedStyles.
+# TODO: suportar com e sem
+Style/SpaceInsideHashLiteralBraces:
+  Enabled: false
+  EnforcedStyle: no_space
+  Exclude:
+    - spec/**/*
+    - test/**/*
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles, UseHashRocketsWithSymbolValues.
+Style/HashSyntax:
+  Enabled: false
+  Exclude:
+    - spec/**/*
+
+# Configuration parameters: AllowURI, URISchemes.
+Metrics/LineLength:
+  Max: 120
+  Exclude:
+    - spec/**/*
+    - test/**/*
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/StringLiterals:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+    - test/**/*
+

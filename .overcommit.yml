@@ -1,0 +1,25 @@
+# https://github.com/brigade/overcommit/blob/master/config/default.yml
+# For a complete list of hooks, see:
+# https://github.com/brigade/overcommit/tree/master/lib/overcommit/hook
+# For a complete list of options that you can use to customize hooks, see:
+# https://github.com/brigade/overcommit#configuration
+
+CommitMsg:
+  CapitalizedSubject:
+    enabled: false
+
+PreCommit:
+  RuboCop:
+    enabled: true
+    on_warn: fail # Treat all warnings as failures
+    command: ['bin/rubocop-precommit']
+
+  TrailingWhitespace:
+    enabled: true
+
+TrailingWhitespace:
+  enabled: true
+
+PrePush:
+  RSpec:
+    enabled: true

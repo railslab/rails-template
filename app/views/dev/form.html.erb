@@ -1,0 +1,13 @@
+<h1>Form</h1>
+
+<%= simple_form_for(@model, url: '/dev/form', method: :post) do |f| %>
+  <%= f.input :email, as: :email %>
+  <%= f.input :uf, as: :select, collection: %w(PR SP RJ) %>
+  <%= f.input :sexo, as: :radio_buttons, collection: @model.collection_for_sexo, item_wrapper_class: 'radio-inline' %>
+  <%= f.input :message, as: :text, input_html: {rows: 5} %>
+  <%= f.input :ativo, as: :boolean %>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>
