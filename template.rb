@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :editor_config
+run_commit :metatags
 
 exit
 
