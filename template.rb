@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :metatags
+run_commit :heroku
 
 exit
 

@@ -58,3 +58,8 @@ end
 gem 'slim-rails'
 gem 'email_validator'
 gem 'rails-i18n'
+group :production do
+  gem 'rails_12factor'
+  gem 'pg'
+  gem 'puma'
+end
