@@ -63,3 +63,5 @@ group :production do
   gem 'pg'
   gem 'puma'
 end
+
+gem 'bootstrap-sass'
