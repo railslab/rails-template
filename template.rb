@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :tools
+run_commit :gem_slim
 
 exit
 

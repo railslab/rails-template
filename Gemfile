@@ -54,3 +54,5 @@ group :development do
   gem 'guard-livereload', require: false
   gem 'rails_best_practices', require: false
 end
+
+gem 'slim-rails'
