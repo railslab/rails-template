@@ -22,4 +22,5 @@ run_commit :git_init,
            :inflections,
            :dev_route,
            :bootstrap,
-           :simple_form
+           :simple_form,
+           :gem_nprogress_rails

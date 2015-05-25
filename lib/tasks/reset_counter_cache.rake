@@ -1,4 +1,5 @@
 namespace :utils do
+  # https://www.krautcomputing.com/blog/2015/01/13/recalculate-counter-cache-columns-in-rails/
   desc "Reset Counter Cache on all models with counter_cache and that differ in counts"
   task reset_counter_cache: :environment do
     # Make sure to load all models first

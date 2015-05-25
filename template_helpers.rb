@@ -38,7 +38,7 @@ def run_commit(*methods)
   methods.each do |method|
     msg = method.to_s.tr '_', ' '
     send method.to_sym
-    git_add_commit msg
+    # git_add_commit msg
   end
 end
 

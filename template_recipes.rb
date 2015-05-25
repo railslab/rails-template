@@ -136,3 +136,17 @@ def simple_form
   gem 'simple_form'
   generate 'simple_form:install', '--bootstrap'
 end
+
+def gem_nprogress_rails
+  gem 'nprogress-rails'
+
+  insert_into_file 'app/assets/javascripts/application.js', after: "//= require turbolinks\n" do
+    "//= require nprogress\n" +
+    "//= require nprogress-turbolinks\n"
+  end
+
+  insert_into_file 'app/assets/stylesheets/application.css', before: " *= require_tree ." do
+    " *= require nprogress\n" +
+    " *= require nprogress-bootstrap\n"
+  end
+end

@@ -70,3 +70,4 @@ gem 'bootstrap-sass'
 gem 'simple_form'
 
 gem 'lograge'
+gem 'nprogress-rails'
