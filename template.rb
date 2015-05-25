@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :heroku
+run_commit :inflections, :dev_route, :bootstrap, :simple_form
 
 exit
 
