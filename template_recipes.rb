@@ -157,3 +157,10 @@ def gem_kaminari
   gem 'kaminari-i18n'
   generate *%w(kaminari:views bootstrap3 -e slim)
 end
+
+def mysql
+  gem 'mysql2', group: :development
+  mirror 'config/database.yml'
+  database_name = ask "database name?"
+  gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
+end

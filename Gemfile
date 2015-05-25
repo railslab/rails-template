@@ -73,3 +73,4 @@ gem 'lograge'
 gem 'nprogress-rails'
 gem 'kaminari'
 gem 'kaminari-i18n'
+gem 'mysql2', group: :development
