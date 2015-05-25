@@ -79,6 +79,8 @@ GEM
     em-websocket (0.5.1)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
+    email_validator (1.6.0)
+      activemodel
     erubis (2.7.0)
     eventmachine (1.0.7)
     execjs (2.5.2)
@@ -264,6 +266,7 @@ DEPENDENCIES
   byebug
   coffee-rails (~> 4.1.0)
   did_you_mean
+  email_validator
   guard-livereload
   jbuilder (~> 2.0)
   jquery-rails
