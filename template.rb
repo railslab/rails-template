@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :timezone_brasilia
+run_commit :default_locale_br
 
 exit
 

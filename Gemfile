@@ -57,3 +57,4 @@ end
 
 gem 'slim-rails'
 gem 'email_validator'
+gem 'rails-i18n'
