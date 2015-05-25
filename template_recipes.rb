@@ -3,7 +3,7 @@ require_relative './template_helpers'
 def git_init
   git :init
   git_ignore '/.idea/'
-  #git_add_commit 'init'
+  # git_add_commit 'init'
 end
 
 def add_ruby_version_to_gemfile
@@ -42,7 +42,6 @@ end
 
 def gem_extras
   gem 'email_validator'
-
 end
 
 def remove_sqlit3_from_production

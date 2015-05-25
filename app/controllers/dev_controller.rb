@@ -31,6 +31,6 @@ class DevModel
   validates :email, presence: true
 
   def collection_for_sexo
-    [['Masculino', 'M'], ['Feminino', 'F']]
+    [%w(Masculino M), %w(Feminino F')]
   end
 end

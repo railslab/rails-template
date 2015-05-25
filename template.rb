@@ -22,4 +22,3 @@ run_commit :git_init,
            :dev_route,
            :bootstrap,
            :simple_form
-

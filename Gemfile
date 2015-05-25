@@ -43,7 +43,6 @@ group :development, :test do
   gem 'spring'
 end
 
-
 group :development do
   gem 'thin'
   gem 'bump', require: false
