@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :local_mailer
+run_commit :clean_routes_comments
 
 exit
 
