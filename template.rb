@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit :clean_routes_comments
+run_commit :editor_config
 
 exit
 
