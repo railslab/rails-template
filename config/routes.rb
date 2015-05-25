@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  get 'dev(/:action(/:id))', controller: 'dev'
+  match 'dev(/:action(/:id))', controller: 'dev', via: :all
 end

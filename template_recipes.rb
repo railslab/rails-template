@@ -112,7 +112,7 @@ def inflections
 end
 
 def dev_route
-  route "get 'dev(/:action(/:id))', controller: 'dev'"
+  route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
 
   mirror 'app/controllers/dev_controller.rb',
          'app/views/dev/form.html.erb',
