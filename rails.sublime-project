@@ -1,0 +1,16 @@
+{
+  "folders":
+  [
+    {
+      "path": ".",
+      "folder_exclude_patterns": ["tmp", "log", ".idea"],
+      "follow_symlinks": true
+    }
+  ],
+  "settings":
+  {
+  },
+  "build_systems":
+  [
+  ]
+}

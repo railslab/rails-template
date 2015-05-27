@@ -2,7 +2,7 @@ require_relative './template_helpers'
 
 def git_init
   git :init
-  git_ignore '/.idea/'
+  git_ignore '/.idea/', '*.sublime-workspace'
   # git_add_commit 'init'
 end
 
@@ -38,10 +38,10 @@ def tools
     # gem 'rubocop-select',     require: false # https://github.com/packsaddle/rubocop-select
   end
 
-  mirror '.rubocop.yml'
-  mirror '.overcommit.yml'
-  mirror 'lib/tasks/auto_annotate_models.rake'
-  mirror 'lib/tasks/reset_counter_cache.rake'
+  mirror '.rubocop.yml',
+         '.overcommit.yml',
+         'lib/tasks/auto_annotate_models.rake',
+         'lib/tasks/reset_counter_cache.rake'
 end
 
 def gem_lograge
@@ -90,8 +90,9 @@ def clean_routes_comments
             "\n"
 end
 
-def editor_config
-  mirror '.editorconfig'
+def editors
+  mirror '.editorconfig',
+         'rails.sublime-project'
 end
 
 # https://gist.github.com/kevinSuttle/1997924
