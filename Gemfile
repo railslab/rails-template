@@ -49,6 +49,7 @@ group :development do
   gem 'rubocop', require: false
   gem 'brakeman', require: false
   gem 'annotate'
+  gem 'pry-rails'
   gem 'overcommit', require: false
   gem 'did_you_mean'
   gem 'meta_request'
@@ -68,7 +69,6 @@ end
 
 gem 'bootstrap-sass'
 gem 'simple_form'
-
 gem 'lograge'
 gem 'nprogress-rails'
 gem 'kaminari'

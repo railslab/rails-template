@@ -20,6 +20,7 @@ def tools
     gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
     gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
     gem 'annotate'                             # https://github.com/ctran/annotate_models
+    gem 'pry-rails'                            # https://github.com/rweng/pry-rails
     gem 'overcommit',           require: false # https://github.com/brigade/overcommit
     gem 'did_you_mean'
     # http://guides.rubyonrails.org/debugging_rails_applications.html
