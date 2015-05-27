@@ -21,7 +21,13 @@ def tools
     gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
     gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
     gem 'annotate'                             # https://github.com/ctran/annotate_models
+
+    # gem 'pry-doc'                              # https://github.com/pry/pry-doc
     gem 'pry-rails'                            # https://github.com/rweng/pry-rails
+    gem 'pry-rescue',           require: false # https://github.com/ConradIrwin/pry-rescue
+    # gem 'pry-byebug'                           # https://github.com/deivid-rodriguez/pry-byebug
+    gem 'pry-stack_explorer',   require: false # https://github.com/pry/pry-stack_explorer
+
     gem 'overcommit',           require: false # https://github.com/brigade/overcommit
     gem 'did_you_mean'
     # http://guides.rubyonrails.org/debugging_rails_applications.html
