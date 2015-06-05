@@ -1,0 +1,8 @@
+#!/bin/sh
+# executa rubocop apenas nos arquivos que serao comitados
+# filtra apenas arquivos rb
+# ou utiliza rubocop-selec, mas duas vezes mais lento
+# xargs -0 bundle exec rubocop-select
+git diff --cached --name-only --diff-filter=AM \
+| grep "\.rb$" \
+| xargs bundle exec rubocop -F --force-exclusion

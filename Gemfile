@@ -50,11 +50,12 @@ group :development do
   gem 'brakeman', require: false
   gem 'annotate'
 
-  gem 'pry-doc'
   gem 'pry-rails'
+  gem 'pry-doc'
   gem 'pry-rescue', require: false
   # gem 'pry-byebug'
   gem 'pry-stack_explorer', require: false
+  gem 'awesome_print', require: false
 
   gem 'overcommit', require: false
   gem 'did_you_mean'

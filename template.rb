@@ -1,6 +1,6 @@
 require_relative './template_recipes'
 
-run_commit ENV['RECIPE'] if ENV['RECIPE']
+send ENV['RECIPE'] if ENV['RECIPE']
 
 exit
 

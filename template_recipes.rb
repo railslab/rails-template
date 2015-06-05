@@ -1,3 +1,4 @@
+# estudar http://guides.rubyonrails.org/generators.html e https://github.com/startae/start
 require_relative './template_helpers'
 
 def git_init
@@ -21,12 +22,18 @@ def tools
     gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
     gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
     gem 'annotate'                             # https://github.com/ctran/annotate_models
-
-    # gem 'pry-doc'                              # https://github.com/pry/pry-doc
+    # brew install libiconv
+    # brew install graphviz --with-bindings --with-freetype --with-librsvg --with-pango
+    # baixar http://www.graphviz.org/pub/graphviz/stable/macos/lion/graphviz-2.38.0.pkg
+    # gem 'rails-erd'                            # http://rails-erd.rubyforge.org/customise.html
+    # gem 'railroady'
+    # precisa vir antes de todos
     gem 'pry-rails'                            # https://github.com/rweng/pry-rails
+    # gem 'pry-doc'                            # https://github.com/pry/pry-doc
     gem 'pry-rescue',           require: false # https://github.com/ConradIrwin/pry-rescue
-    # gem 'pry-byebug'                           # https://github.com/deivid-rodriguez/pry-byebug
+    # gem 'pry-byebug'                         # https://github.com/deivid-rodriguez/pry-byebug
     gem 'pry-stack_explorer',   require: false # https://github.com/pry/pry-stack_explorer
+    gem 'awesome_print',        require: false
 
     gem 'overcommit',           require: false # https://github.com/brigade/overcommit
     gem 'did_you_mean'
@@ -39,6 +46,7 @@ def tools
   end
 
   mirror '.rubocop.yml',
+         'bin/rubocop-precommit',
          '.overcommit.yml',
          'lib/tasks/auto_annotate_models.rake',
          'lib/tasks/reset_counter_cache.rake'
@@ -56,6 +64,7 @@ end
 
 def gem_extras
   gem 'email_validator'
+  gem 'active_link_to'
 end
 
 def remove_sqlit3_from_production
@@ -145,6 +154,14 @@ end
 def simple_form
   gem 'simple_form'
   generate 'simple_form:install', '--bootstrap'
+  # smaller label form size, from 3 to 2.
+  gsub_file 'config/initializers/simple_form_bootstrap.rb',
+            'col-sm-9',
+            'col-sm-10'
+  gsub_file 'config/initializers/simple_form_bootstrap.rb',
+            'col-sm-3',
+            'col-sm-2'
+  mirror 'app/helpers/simple_form_helper.rb'
 end
 
 def gem_nprogress_rails
