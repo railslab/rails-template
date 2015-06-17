@@ -8,6 +8,9 @@ AllCops:
     - bin/*
     - config/initializers/*
 
+Style/AsciiComments:
+  Enabled: false
+
 # Configuration parameters: AllowSafeAssignment.
 Lint/AssignmentInCondition:
   Enabled: true
