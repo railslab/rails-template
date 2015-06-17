@@ -1,5 +1,4 @@
 namespace :stats do
-
   def calculate
     require 'rails/code_statistics'
     cs = CodeStatistics.new(*STATS_DIRECTORIES)
@@ -17,22 +16,22 @@ namespace :stats do
     data
   end
 
-  desc "stats in yaml format"
+  desc 'stats in yaml format'
   task yml: :environment do
     puts calculate.to_yaml
   end
 
-  desc "stats in json format"
+  desc 'stats in json format'
   task json: :environment do
     puts JSON.pretty_generate(calculate)
   end
 
-  desc "stats in csv format"
+  desc 'stats in csv format'
   task csv: :environment do
     numbers = []
     calculate.each do |_, h|
       numbers << h.values.join(',')
     end
-    puts numbers.join ", "
+    puts numbers.join ', '
   end
 end
