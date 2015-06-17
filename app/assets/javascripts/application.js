@@ -16,3 +16,9 @@
 //= require nprogress
 //= require nprogress-turbolinks
 //= require_tree .
+
+Turbolinks.enableTransitionCache();
+
+$(document).on('ready page:load', function() {
+
+});
