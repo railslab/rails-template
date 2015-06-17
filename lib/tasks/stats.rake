@@ -4,34 +4,45 @@ namespace :stats do
     cs = CodeStatistics.new(*STATS_DIRECTORIES)
     stats = cs.instance_variable_get(:@statistics)
     stats['Total'] = cs.instance_variable_get(:@total)
-    data = {}
-    stats.each do |k, v|
-      data[k.downcase] = {
-        'lines' => v.lines,
-        'code_lines' => v.code_lines,
-        'classes' => v.classes,
-        'methods' => v.methods
-      }
-    end
-    data
+    Hash[stats.map { |k, v| [k.downcase, v.instance_values] }]
+  end
+
+  def yml
+    calculate.to_yaml
+  end
+
+  def json
+    JSON.pretty_generate(calculate)
+  end
+
+  def csv
+    calculate.inject([]) { |array, h| array << h.values.join(',') }.join ', '
+  end
+
+  def txt
+    capture(:stdout) { Rake::Task["stats"].invoke }
   end
 
   desc 'stats in yaml format'
   task yml: :environment do
-    puts calculate.to_yaml
+    puts yml
   end
 
   desc 'stats in json format'
   task json: :environment do
-    puts JSON.pretty_generate(calculate)
+    puts json
   end
 
   desc 'stats in csv format'
   task csv: :environment do
-    numbers = []
-    calculate.each do |_, h|
-      numbers << h.values.join(',')
-    end
-    puts numbers.join ', '
+    puts csv
+  end
+
+  desc 'save all stats to stats/*'
+  task save: :environment do
+    Dir.mkdir('stats') rescue
+    File.write('stats/stats.yml', yml)
+    File.write('stats/stats.json', json)
+    File.write('stats/stats.txt', txt)
   end
 end
