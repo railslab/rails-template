@@ -17,9 +17,6 @@ PreCommit:
   TrailingWhitespace:
     enabled: true
 
-TrailingWhitespace:
-  enabled: true
-
 PrePush:
   RSpec:
-    enabled: true
+    enabled: false
