@@ -5,9 +5,9 @@ sqlite: &sqlite
 mysql: &mysql
   adapter: mysql2
   host: 127.0.0.1
+  port: 3306
   username: root
   password:
-  port: 3306
   database: test
 
 pg: &pg
@@ -16,7 +16,6 @@ pg: &pg
   username: postgres
   password: password
   encoding: unicode
-  pool: 4
 
 development:
   <<: *mysql
