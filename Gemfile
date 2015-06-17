@@ -20,11 +20,11 @@ gem 'turbolinks'
 
 # CUSTOM GEMS
 
-# gem 'lograge'
-# gem 'slim-rails'
+gem 'lograge'
+gem 'slim-rails'
 # gem 'active_link_to'
 
-# gem 'simple_form'
+gem 'simple_form'
 # gem 'bootstrap-sass'
 # gem 'bootstrap_flash_messages'
 # gem 'bootstrap_tokenfield_rails'
@@ -66,6 +66,7 @@ group :development do
   gem 'annotate'
   gem 'did_you_mean'
   gem 'meta_request'
+  gem 'pry-rails'
   # gem 'rails_db_info'
 end
 
@@ -77,7 +78,6 @@ group :console do
   # gem 'rails_best_practices'
   # gem 'guard-livereload'
 
-  # gem 'pry-rails'
   # gem 'pry-doc'
   # gem 'pry-byebug'
   # gem 'pry-rescue'

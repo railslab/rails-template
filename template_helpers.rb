@@ -44,7 +44,6 @@ module Helpers
   end
 
   def enable_gem(name, group = nil)
-    before = File.binread('Gemfile')
     gem_name = "gem '#{name}'"
     uncomment_lines 'Gemfile', gem_name
     return if File.read('Gemfile').match gem_name

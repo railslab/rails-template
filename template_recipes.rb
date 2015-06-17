@@ -1,6 +1,8 @@
 # estudar http://guides.rubyonrails.org/generators.html e https://github.com/startae/start
 require_relative './template_helpers'
 
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/ModuleLength
 module Recipes
   include Helpers
 
@@ -10,10 +12,10 @@ module Recipes
 
   def cook(recipe, commit = true)
     send recipe
-    if commit
-      msg = recipe.to_s.tr '_', ' '
-      git_add_commit msg
-    end
+    return unless commit
+
+    msg = recipe.to_s.tr '_', ' '
+    git_add_commit msg
   end
   module_function :cook
 
