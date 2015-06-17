@@ -1,192 +1,231 @@
 # estudar http://guides.rubyonrails.org/generators.html e https://github.com/startae/start
 require_relative './template_helpers'
 
-def git_init
-  git :init
-  git_ignore '/.idea/', '*.sublime-workspace'
-  # git_add_commit 'init'
-end
+module Recipes
+  include Helpers
 
-def add_ruby_version_to_gemfile
-  version = run_capture 'rbenv global'
-  insert_into_file 'Gemfile',
-                   "ruby '#{version}'",
-                   after: /source .+\n/
-end
-
-# rubocop:disable Metrics/MethodLength
-def tools
-  gem_group :development do
-    gem 'thin'
-    gem 'bump',                 require: false # https://github.com/gregorym/bump#usage
-    gem 'rubocop',              require: false # https://github.com/bbatsov/rubocop#installation
-    gem 'brakeman',             require: false # https://github.com/presidentbeef/brakeman
-    gem 'annotate'                             # https://github.com/ctran/annotate_models
-    # brew install libiconv
-    # brew install graphviz --with-bindings --with-freetype --with-librsvg --with-pango
-    # baixar http://www.graphviz.org/pub/graphviz/stable/macos/lion/graphviz-2.38.0.pkg
-    # gem 'rails-erd'                            # http://rails-erd.rubyforge.org/customise.html
-    # gem 'railroady'
-    # precisa vir antes de todos
-    gem 'pry-rails'                            # https://github.com/rweng/pry-rails
-    # gem 'pry-doc'                            # https://github.com/pry/pry-doc
-    gem 'pry-rescue',           require: false # https://github.com/ConradIrwin/pry-rescue
-    # gem 'pry-byebug'                         # https://github.com/deivid-rodriguez/pry-byebug
-    gem 'pry-stack_explorer',   require: false # https://github.com/pry/pry-stack_explorer
-    gem 'awesome_print',        require: false
-
-    gem 'overcommit',           require: false # https://github.com/brigade/overcommit
-    gem 'did_you_mean'
-    # http://guides.rubyonrails.org/debugging_rails_applications.html
-    gem 'meta_request' # logger.debug          # https://github.com/dejan/rails_panel
-    gem 'rails_db_info' # GET /rails/info/db   # https://github.com/yuki24/did_you_mean#nomethoderror
-    gem 'guard-livereload',     require: false # https://github.com/guard/guard-livereload#install
-    gem 'rails_best_practices', require: false # https://github.com/railsbp/rails_best_practices
-    # gem 'rubocop-select',     require: false # https://github.com/packsaddle/rubocop-select
+  def help
+    puts Recipes.public_instance_methods(false)
   end
 
-  mirror '.rubocop.yml',
-         'bin/rubocop-precommit',
-         '.overcommit.yml',
-         'lib/tasks/auto_annotate_models.rake',
-         'lib/tasks/reset_counter_cache.rake'
-end
+  def cook(recipe, commit = true)
+    send recipe
+    if commit
+      msg = recipe.to_s.tr '_', ' '
+      git_add_commit msg
+    end
+  end
+  module_function :cook
 
-def gem_lograge
-  gem 'lograge'
-  application 'config.lograge.enabled = true'
-end
-
-def gem_slim
-  gem 'slim-rails'
-  dev 'Slim::Engine.set_options pretty: true'
-end
-
-def gem_extras
-  gem 'email_validator'
-  gem 'active_link_to'
-end
-
-def remove_sqlit3_from_production
-  gsub_file 'Gemfile',
-            "gem 'sqlite3'\n",
-            "gem 'sqlite3', group: [:development, :test]\n"
-end
-
-def timezone_brasilia
-  application "config.time_zone = 'Brasilia'"
-end
-
-def default_locale_br
-  application "config.i18n.default_locale = :'pt-BR'"
-  gem 'rails-i18n'
-end
-
-def raise_unpermitted_parameters_on_dev
-  dev 'config.action_controller.action_on_unpermitted_parameters = :raise'
-end
-
-def local_mailer
-  dev "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }"
-end
-
-def clean_routes_comments
-  gsub_file 'config/routes.rb',
-            /^.*#.+/,
-            ''
-  gsub_file 'config/routes.rb',
-            /\n(\n|\s|#)+/,
-            "\n"
-end
-
-def editors
-  mirror '.editorconfig',
-         'rails.sublime-project'
-end
-
-# https://gist.github.com/kevinSuttle/1997924
-def metatags
-  mirror 'app/views/layouts/_meta.erb'
-  insert_into_file 'app/views/layouts/application.html.erb',
-                   "\n  <%= render 'layouts/meta' %>",
-                   after: '</title>'
-end
-
-# https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
-# https://devcenter.heroku.com/articles/getting-started-with-rails4#use-postgres
-# https://devcenter.heroku.com/articles/getting-started-with-rails4#webserver
-def heroku(server = nil)
-  server ||= yes?('Server: (Y)Puma, (N)Unicorn') ? 'puma' : 'unicorn'
-
-  gem_group :production do
-    gem 'rails_12factor'
-    gem 'pg'
-    gem server
+  # apenas inicializar o repositório git
+  def git_init
+    git :init
   end
 
-  mirror "config/#{server}.rb"
-
-  args = server == 'puma' ? '-C' : '-p $PORT -c'
-  create_file 'Procfile', "web: bundle exec #{server} #{args} config/#{server}.rb\n"
-end
-
-def inflections
-  mirror 'config/initializers/inflections.rb'
-end
-
-def dev_route
-  route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
-
-  mirror 'app/controllers/dev_controller.rb',
-         'app/views/dev/form.html.erb',
-         'app/views/dev/pagination.html.slim',
-         'app/views/layouts/dev.html.erb'
-end
-
-def bootstrap
-  gem 'bootstrap-sass'
-
-  mirror 'app/assets/stylesheets/bootstrap-custom.scss',
-         'app/assets/stylesheets/bootstrap-imports.scss',
-         'app/assets/stylesheets/bootstrap-overrides.scss'
-end
-
-def simple_form
-  gem 'simple_form'
-  generate 'simple_form:install', '--bootstrap'
-  # smaller label form size, from 3 to 2.
-  gsub_file 'config/initializers/simple_form_bootstrap.rb',
-            'col-sm-9',
-            'col-sm-10'
-  gsub_file 'config/initializers/simple_form_bootstrap.rb',
-            'col-sm-3',
-            'col-sm-2'
-  mirror 'app/helpers/simple_form_helper.rb'
-end
-
-def gem_nprogress_rails
-  gem 'nprogress-rails' # https://github.com/caarlos0/nprogress-rails
-
-  insert_into_file 'app/assets/javascripts/application.js', after: "//= require turbolinks\n" do
-    "//= require nprogress\n" \
-    "//= require nprogress-turbolinks\n"
+  # ignorar arquivos de configuração de IDEs
+  def git_ignore_ide_files
+    git_ignore '/.idea/', '*.sublime-workspace'
   end
 
-  insert_into_file 'app/assets/stylesheets/application.css', before: ' *= require_tree .' do
-    " *= require nprogress\n" \
-    " *= require nprogress-bootstrap\n"
+  # utilizar Gemfile com várias gems comentadas
+  def replace_gemfile
+    mirror 'Gemfile'
   end
-end
 
-def gem_kaminari
-  gem 'kaminari'
-  gem 'kaminari-i18n'
-  generate(*%w(kaminari:views bootstrap3 -e slim))
-end
+  def reset_routes
+    replace_file 'config/routes.rb', <<-EOF.strip_heredoc
+      Rails.application.routes.draw do
+      end
+    EOF
+  end
 
-def mysql
-  gem 'mysql2', group: :development
-  mirror 'config/database.yml'
-  database_name = ask 'database name?'
-  gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
+  def clean_routes_comments
+    gsub_file 'config/routes.rb',
+              /^.*#.+/,
+              ''
+    gsub_file 'config/routes.rb',
+              /\n(\n|\s|#)+/,
+              "\n"
+  end
+
+  # colocar a pasta bin no path utilizando direnv
+  def direnv
+    create_file '.envrc', "PATH_add bin\n"
+    run 'direnv allow .'
+  end
+
+  # instalar spring para acelerar rails console e rake
+  def setup_spring
+    run 'spring binstub --all'
+  end
+
+  # configurar database.yml para mysql, perguntando o nome do banco para ser criado
+  def config_db
+    mirror 'config/database.yml'
+    database_name = ask 'database name?'
+    gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
+    rake 'db:create'
+  end
+
+  def add_ruby_version_to_gemfile
+    version = run_capture 'rbenv global'
+    insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+\n/
+  end
+
+  def tools
+    mirror '.rubocop.yml',
+           'bin/rubocop-precommit',
+           '.overcommit.yml',
+           'lib/tasks/auto_annotate_models.rake',
+           'lib/tasks/reset_counter_cache.rake',
+           'lib/tasks/stats.rake'
+  end
+
+  def single_line_logs_with_lograge
+    enable_gem 'lograge'
+    application 'config.lograge.enabled = true'
+  end
+
+  def timezone_brasilia
+    application "config.time_zone = 'Brasilia'"
+  end
+
+  def default_locale_br
+    enable_gem 'rails-i18n'
+    application "config.i18n.default_locale = :'pt-BR'"
+    mirror 'config/locales/pt-BR.yml'
+  end
+
+  def brazillian_inflections
+    mirror 'config/initializers/inflections.rb'
+  end
+
+  def raise_unpermitted_parameters_on_dev
+    dev 'config.action_controller.action_on_unpermitted_parameters = :raise'
+  end
+
+  def local_mailer
+    dev "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }"
+  end
+
+  def editors_config_files
+    mirror '.editorconfig',
+           'rails.sublime-project'
+  end
+
+  # https://gist.github.com/kevinSuttle/1997924
+  def layout_head_metatags
+    mirror 'app/views/layouts/_meta.erb'
+    insert_into_file 'app/views/layouts/application.html.erb',
+                     "\n  <%= render 'layouts/meta' %>",
+                     after: '</title>'
+  end
+
+  def layout_bootstrap_container
+    gsub_file 'app/views/layouts/application.html.erb', "<%= yield %>\n", <<-EOF.strip_heredoc
+    <div class="container-fluid">
+      <%= yield %>
+    </div>
+    EOF
+  end
+
+  # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
+  # https://devcenter.heroku.com/articles/getting-started-with-rails4#use-postgres
+  # https://devcenter.heroku.com/articles/getting-started-with-rails4#webserver
+  def heroku(server = nil)
+    server ||= yes?('Server: (ENTER)Puma (default), (Y)Unicorn') ? 'unicorn' : 'puma'
+
+    enable_gem 'rails_12factor', :production
+    enable_gem 'pg', :production
+    enable_gem server, :production
+
+    mirror "config/#{server}.rb"
+
+    args = server == 'puma' ? '-C' : '-p $PORT -c'
+    create_file 'Procfile', "web: bundle exec #{server} #{args} config/#{server}.rb\n"
+  end
+
+  def pagination_with_kaminari_gem
+    enable_gem 'kaminari'
+    enable_gem 'kaminari-i18n'
+    # ou utilizar https://github.com/matenia/bootstrap-kaminari-views mas precisa especificar o tema.
+    generate 'kaminari:views bootstrap3 -e slim'
+  end
+
+  def simple_form_bootstrap
+    enable_gem 'simple_form'
+    generate 'simple_form:install --bootstrap'
+
+    # smaller label form size, from 3 to 2.
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-9',
+              'col-sm-10'
+
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-3',
+              'col-sm-2'
+
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-offset-3',
+              'col-sm-offset-2'
+
+    mirror 'app/helpers/simple_form_helper.rb'
+  end
+
+  def dev_route
+    route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
+
+    mirror 'app/controllers/dev_controller.rb',
+           'app/views/dev/form.html.erb',
+           'app/views/dev/pagination.html.slim',
+           'app/views/layouts/dev.html.erb'
+  end
+
+  def bootstrap
+    enable_gem 'bootstrap-sass'
+    enable_gem 'sass-rails'
+    enable_gem 'coffee-rails'
+
+    mirror 'app/assets/stylesheets/bootstrap-custom.scss',
+           'app/assets/stylesheets/bootstrap-imports.scss',
+           'app/assets/stylesheets/bootstrap-overrides.scss'
+  end
+
+  def gem_nprogress_rails
+    gem 'nprogress-rails' # https://github.com/caarlos0/nprogress-rails
+
+    insert_into_file 'app/assets/javascripts/application.js', after: "//= require turbolinks\n" do
+      "//= require nprogress\n" \
+      "//= require nprogress-turbolinks\n"
+    end
+
+    insert_into_file 'app/assets/stylesheets/application.css', before: ' *= require_tree .' do
+      " *= require nprogress\n" \
+      " *= require nprogress-bootstrap\n"
+    end
+  end
+
+  def default_project
+    cook :git_init
+    cook :git_ignore_ide_files
+    cook :replace_gemfile
+    cook :reset_routes
+    cook :direnv
+    cook :setup_spring
+    cook :config_db
+    cook :add_ruby_version_to_gemfile
+    cook :tools
+    cook :single_line_logs_with_lograge
+    cook :timezone_brasilia
+    cook :default_locale_br
+    cook :brazillian_inflections
+    cook :raise_unpermitted_parameters_on_dev
+    cook :local_mailer
+    cook :editors_config_files
+    cook :layout_head_metatags
+    cook :layout_bootstrap_container
+    cook :heroku
+    cook :pagination_with_kaminari_gem
+    cook :simple_form_bootstrap
+  end
 end
