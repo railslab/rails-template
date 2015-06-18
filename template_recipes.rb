@@ -247,7 +247,7 @@ module Recipes
     end
   end
 
-  def default_project
+  def default
     cook :git_init
     cook :git_ignore_ide_files
     cook :replace_gemfile
