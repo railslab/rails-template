@@ -20,7 +20,7 @@ PreCommit:
     enabled: true
 
   RakeStatsSave:
-    enabled: true
+    enabled: false # muito lento
 
 PrePush:
   RSpec:
