@@ -17,6 +17,9 @@ PreCommit:
   TrailingWhitespace:
     enabled: true
 
+  RakeStatsSave:
+    enabled: true
+
 PrePush:
   RSpec:
     enabled: false
