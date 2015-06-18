@@ -16,11 +16,11 @@ namespace :stats do
   end
 
   def csv
-    calculate.inject([]) { |array, h| array << h.values.join(',') }.join ', '
+    calculate.inject([]) { |a, e| a << e.values.join(',') }.join ', '
   end
 
   def txt
-    capture(:stdout) { Rake::Task["stats"].invoke }
+    capture(:stdout) { Rake::Task['stats'].invoke }
   end
 
   desc 'stats in yaml format'
@@ -40,7 +40,7 @@ namespace :stats do
 
   desc 'save all stats to stats/*'
   task save: :environment do
-    Dir.mkdir('stats') rescue
+    Dir.mkdir('stats') unless Dir.exist? 'stats'
     File.write('stats/stats.yml', yml)
     File.write('stats/stats.json', json)
     File.write('stats/stats.txt', txt)

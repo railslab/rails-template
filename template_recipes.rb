@@ -41,6 +41,7 @@ module Recipes
     EOF
   end
 
+  # versão alternativa para o método acima
   def clean_routes_comments
     gsub_file 'config/routes.rb',
               /^.*#.+/,
@@ -124,11 +125,16 @@ module Recipes
   end
 
   def layout_bootstrap_container
-    gsub_file 'app/views/layouts/application.html.erb', "<%= yield %>\n", <<-EOF.strip_heredoc
+    gsub_file 'app/views/layouts/application.html.erb', "\n<%= yield %>\n", <<-EOF.strip_heredoc
+
     <div class="container-fluid">
       <%= yield %>
     </div>
     EOF
+  end
+
+  def layout_add_space_between_js_and_css
+    gsub_file 'app/views/layouts/application.html.erb', 'true %>', "true %>\n"
   end
 
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
@@ -174,13 +180,29 @@ module Recipes
     mirror 'app/helpers/simple_form_helper.rb'
   end
 
-  def dev_route
-    route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
+  # utilizar application.js apenas para as diretivas do sprockets
+  def setup_js
+    enable_gem 'coffee-rails'
 
-    mirror 'app/controllers/dev_controller.rb',
-           'app/views/dev/form.html.erb',
-           'app/views/dev/pagination.html.slim',
-           'app/views/layouts/dev.html.erb'
+    replace_file 'app/assets/javascripts/application.js', <<-EOF.strip_heredoc
+      //= require jquery
+      //= require jquery_ujs
+      //= require turbolinks
+      //= require_tree .
+    EOF
+
+    mirror 'app/assets/javascripts/app.coffee'
+  end
+
+  # utilizar application.css apenas para as diretivas do sprockets
+  def setup_css
+    enable_gem 'sass-rails'
+
+    replace_file 'app/assets/stylesheets/application.css', <<-EOF.strip_heredoc
+      /*
+       *= require_tree .
+       */
+    EOF
   end
 
   def bootstrap
@@ -188,9 +210,20 @@ module Recipes
     enable_gem 'sass-rails'
     enable_gem 'coffee-rails'
 
-    mirror 'app/assets/stylesheets/bootstrap-custom.scss',
-           'app/assets/stylesheets/bootstrap-imports.scss',
-           'app/assets/stylesheets/bootstrap-overrides.scss'
+    mirror 'app/assets/stylesheets/bootstrap-sass.scss',
+           'app/assets/stylesheets/bootstrap-custom.css'
+
+    append_require_css 'bootstrap-sass'
+    append_require_js 'bootstrap'
+  end
+
+  # rota utilizada para debug e testes
+  def dev_route
+    route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
+
+    mirror 'app/controllers/dev_controller.rb',
+           'app/views/layouts/dev.html.erb'
+    directory 'app/views/dev'
   end
 
   def gem_nprogress_rails
@@ -226,8 +259,12 @@ module Recipes
     cook :editors_config_files
     cook :layout_head_metatags
     cook :layout_bootstrap_container
+    cook :layout_add_space_between_js_and_css
     cook :heroku
     cook :pagination_with_kaminari_gem
     cook :simple_form_bootstrap
+    cook :setup_js
+    cook :setup_js
+    cook :bootstrap
   end
 end

@@ -58,4 +58,16 @@ module Helpers
     remove_file file
     create_file file, content, &block
   end
+
+  def append_require_css(name)
+    insert_into_file 'app/assets/stylesheets/application.css',
+                     " *= require #{name}\n",
+                     before: ' *= require_tree .'
+  end
+
+  def append_require_js(name)
+    insert_into_file 'app/assets/javascripts/application.js',
+                     "//= require #{name}\n",
+                     before: '//= require_tree .'
+  end
 end
