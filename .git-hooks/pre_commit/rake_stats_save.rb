@@ -2,7 +2,7 @@ module Overcommit::Hook::PreCommit
   class RakeStatsSave < Base
     def run
       fix_stash do
-        result = execute %w(rake stats:save)
+        result = execute %w(bin/rake stats:save)
         result = execute %w(git add stats) if result.success?
         result.success? ? :pass : [:fail, result.stdout]
       end
