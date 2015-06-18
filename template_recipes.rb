@@ -75,13 +75,20 @@ module Recipes
     insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+\n/
   end
 
-  def tools
+  def rubocop
     mirror '.rubocop.yml',
-           'bin/rubocop-precommit',
-           '.overcommit.yml',
-           'lib/tasks/auto_annotate_models.rake',
-           'lib/tasks/reset_counter_cache.rake',
-           'lib/tasks/stats.rake'
+           'bin/rubocop-precommit'
+  end
+
+  def tasks_extras
+    directory 'lib/tasks'
+  end
+
+  def overcommit_setup
+    enable_gem 'overcommit'
+    mirror '.overcommit.yml'
+    directory '.git-hooks'
+    run 'overcommit --install'
   end
 
   def single_line_logs_with_lograge
@@ -249,7 +256,9 @@ module Recipes
     cook :setup_spring
     cook :config_db
     cook :add_ruby_version_to_gemfile
-    cook :tools
+    cook :rubocop
+    cook :tasks_extras
+    cook :overcommit_setup
     cook :single_line_logs_with_lograge
     cook :timezone_brasilia
     cook :default_locale_br

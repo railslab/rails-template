@@ -4,6 +4,8 @@
 # For a complete list of options that you can use to customize hooks, see:
 # https://github.com/brigade/overcommit#configuration
 
+verify_plugin_signatures: false
+
 CommitMsg:
   CapitalizedSubject:
     enabled: false

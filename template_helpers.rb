@@ -39,7 +39,7 @@ module Helpers
 
   def mirror(*names)
     names.each do |name|
-      copy_file name, name, force: true
+      copy_file name, name, force: true, mode: :preserve
     end
   end
 
