@@ -11,7 +11,8 @@ module Recipes
   end
 
   def cook(recipe, commit = true)
-    send recipe
+    response = send recipe
+    return if response == :skip_commit
     return unless commit
 
     msg = recipe.to_s.tr '_', ' '
@@ -22,6 +23,23 @@ module Recipes
   # apenas inicializar o repositório git
   def git_init
     git :init
+  end
+
+  # instalar spring para acelerar rails console e rake
+  def setup_spring
+    run 'spring binstub --all'
+  end
+
+  def disable_generators
+    application <<-EOF.strip_heredoc
+      config.generators do |g|
+            g.assets false
+            g.helper false
+            g.javascripts false
+            g.stylesheets false
+            g.test_framework false
+          end
+    EOF
   end
 
   # ignorar arquivos de configuração de IDEs
@@ -57,11 +75,6 @@ module Recipes
     run 'direnv allow .'
   end
 
-  # instalar spring para acelerar rails console e rake
-  def setup_spring
-    run 'spring binstub --all'
-  end
-
   # configurar database.yml para mysql, perguntando o nome do banco para ser criado
   def config_db
     mirror 'config/database.yml'
@@ -82,13 +95,6 @@ module Recipes
 
   def tasks_extras
     directory 'lib/tasks'
-  end
-
-  def overcommit_setup
-    enable_gem 'overcommit'
-    mirror '.overcommit.yml'
-    directory '.git-hooks'
-    run 'overcommit --install'
   end
 
   def single_line_logs_with_lograge
@@ -224,6 +230,26 @@ module Recipes
     append_require_js 'bootstrap'
   end
 
+  def nprogress_rails
+    enable_gem 'nprogress-rails'
+
+    append_require_js 'nprogress'
+    append_require_js 'nprogress-turbolinks'
+
+    append_require_css 'nprogress'
+    append_require_css 'nprogress-bootstrap'
+  end
+
+  # instalar overcommit por ultimo para nao atrapalhar os commits de cada cook
+  def overcommit_setup
+    enable_gem 'overcommit'
+    mirror '.overcommit.yml'
+    directory '.git-hooks'
+    run 'overcommit --install'
+  end
+
+# ======================================================================================================================
+
   # rota utilizada para debug e testes
   def dev_route
     route "match 'dev(/:action(/:id))', controller: 'dev', via: :all"
@@ -233,32 +259,24 @@ module Recipes
     directory 'app/views/dev'
   end
 
-  def gem_nprogress_rails
-    gem 'nprogress-rails' # https://github.com/caarlos0/nprogress-rails
-
-    insert_into_file 'app/assets/javascripts/application.js', after: "//= require turbolinks\n" do
-      "//= require nprogress\n" \
-      "//= require nprogress-turbolinks\n"
-    end
-
-    insert_into_file 'app/assets/stylesheets/application.css', before: ' *= require_tree .' do
-      " *= require nprogress\n" \
-      " *= require nprogress-bootstrap\n"
-    end
+  def scaffold_cadastro
+    run 'rails destroy scaffold cadastro'
+    generate 'scaffold cadastro nome email'
+    rake 'db:migrate'
   end
 
   def default
     cook :git_init
+    cook :setup_spring
+    cook :disable_generators
     cook :git_ignore_ide_files
     cook :replace_gemfile
     cook :reset_routes
     cook :direnv
-    cook :setup_spring
     cook :config_db
     cook :add_ruby_version_to_gemfile
     cook :rubocop
     cook :tasks_extras
-    cook :overcommit_setup
     cook :single_line_logs_with_lograge
     cook :timezone_brasilia
     cook :default_locale_br
@@ -273,7 +291,10 @@ module Recipes
     cook :pagination_with_kaminari_gem
     cook :simple_form_bootstrap
     cook :setup_js
-    cook :setup_js
+    cook :setup_css
     cook :bootstrap
+    cook :nprogress_rails
+    cook :overcommit_setup
+    :skip_commit
   end
 end

@@ -16,7 +16,7 @@ module Helpers
     git add: '.'
     # git :status
     # TODO: message prefix/suffix/template
-    git commit: %(-m '#template: #{msg}')
+    git commit: %(-m 'template: #{msg}')
     # git diff: 'HEAD^'
   end
 
