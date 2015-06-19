@@ -11,6 +11,7 @@ module Recipes
   end
 
   def cook(recipe, commit = true)
+    say recipe, :green
     response = send recipe
     return if response == :skip_commit
     return unless commit
@@ -80,7 +81,6 @@ module Recipes
     mirror 'config/database.yml'
     database_name = ask 'database name?'
     gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
-    rake 'db:create'
   end
 
   def add_ruby_version_to_gemfile
@@ -124,6 +124,12 @@ module Recipes
     dev "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }"
   end
 
+  # impede que um helper de um controller seja carregado em outro
+  # simple_form_helper será carregado apenas se colocar include SimpleFormHelper no application_helper
+  def disable_include_all_helpers
+    application 'config.action_controller.include_all_helpers = false'
+  end
+
   def editors_config_files
     mirror '.editorconfig',
            'rails.sublime-project'
@@ -150,6 +156,13 @@ module Recipes
     gsub_file 'app/views/layouts/application.html.erb', 'true %>', "true %>\n"
   end
 
+  def layout_flash_messages
+    enable_gem 'bootstrap_flash_messages'
+    insert_into_file 'app/views/layouts/application.html.erb',
+                     "  <%= flash_messages(:close, :fade) %>\n",
+                     before: /^\s+<%= yield %>/
+  end
+
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#use-postgres
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#webserver
@@ -164,13 +177,6 @@ module Recipes
 
     args = server == 'puma' ? '-C' : '-p $PORT -c'
     create_file 'Procfile', "web: bundle exec #{server} #{args} config/#{server}.rb\n"
-  end
-
-  def pagination_with_kaminari_gem
-    enable_gem 'kaminari'
-    enable_gem 'kaminari-i18n'
-    # ou utilizar https://github.com/matenia/bootstrap-kaminari-views mas precisa especificar o tema.
-    generate 'kaminari:views bootstrap3 -e slim'
   end
 
   def simple_form_bootstrap
@@ -190,7 +196,7 @@ module Recipes
               'col-sm-offset-3',
               'col-sm-offset-2'
 
-    mirror 'app/helpers/simple_form_helper.rb'
+    mirror 'config/locales/simple_form.pt-BR.yml'
   end
 
   # utilizar application.js apenas para as diretivas do sprockets
@@ -204,7 +210,7 @@ module Recipes
       //= require_tree .
     EOF
 
-    mirror 'app/assets/javascripts/app.coffee'
+    mirror 'app/assets/javascripts/app.js.coffee'
   end
 
   # utilizar application.css apenas para as diretivas do sprockets
@@ -223,7 +229,7 @@ module Recipes
     enable_gem 'sass-rails'
     enable_gem 'coffee-rails'
 
-    mirror 'app/assets/stylesheets/bootstrap-sass.scss',
+    mirror 'app/assets/stylesheets/bootstrap-sass.css.scss',
            'app/assets/stylesheets/bootstrap-custom.css'
 
     append_require_css 'bootstrap-sass'
@@ -240,9 +246,78 @@ module Recipes
     append_require_css 'nprogress-bootstrap'
   end
 
+  def inherited_resources
+    enable_gem 'inherited_resources'
+    mirror 'app/controllers/concerns/inherited_resources_defaults.rb',
+           'config/initializers/inherited_resources.rb'
+  end
+
+  def pagination_with_kaminari
+    enable_gem 'kaminari'
+    enable_gem 'kaminari-i18n'
+    # ou utilizar https://github.com/matenia/bootstrap-kaminari-views mas precisa especificar o tema.
+    generate 'kaminari:views bootstrap3 -e slim'
+    uncomment_lines 'app/controllers/concerns/inherited_resources_defaults.rb',
+                    'end_of_association_chain'
+  end
+
+  # apenas configura o devise, sem criar user
+  def devise_config
+    enable_gem 'devise'
+    enable_gem 'devise-i18n'
+    enable_gem 'devise-i18n-views'
+    enable_gem 'devise-bootstrap-views'
+
+    generate 'devise:install'
+
+    gsub_file 'config/initializers/devise.rb',
+              'config.password_length = 8..72',
+              'config.password_length = Rails.env.production? ? 8..72 : 1..72'
+
+    insert_into_file 'app/controllers/application_controller.rb',
+                     "  # before_action :authenticate_user!\n",
+                     after: "::Base\n"
+
+    mirror 'app/views/layouts/devise.html.slim'
+  end
+
+  def devise_user
+    generate 'devise user' unless File.read('config/routes.rb').match('devise_for :users')
+
+    uncomment_lines 'app/controllers/application_controller.rb',
+                     'before_action :authenticate_user!'
+
+    uncomment_lines 'app/controllers/concerns/inherited_resources_defaults.rb',
+                    'begin_of_association_chain'
+
+    insert_into_file 'app/models/user.rb',
+                     "  def to_s; email end\n",
+                     before: /^end$/
+  end
+
+  def helper_simple_form
+    mirror 'app/helpers/simple_form_helper.rb'
+  end
+
+  def guard_livereload
+    enable_gem 'guard', :console
+    enable_gem 'guard-livereload', :console
+    run 'guard init livereload'
+  end
+
+  # rake db:seeds:development:users
+  def seeds
+    enable_gem 'seedbank', :development
+    directory 'db/seeds'
+  end
+
+  def scaffold_bootstrap_template
+    directory 'lib/templates/slim/scaffold'
+  end
+
   # instalar overcommit por ultimo para nao atrapalhar os commits de cada cook
   def overcommit_setup
-    enable_gem 'overcommit'
+    enable_gem 'overcommit', :console
     mirror '.overcommit.yml'
     directory '.git-hooks'
     run 'overcommit --install'
@@ -265,36 +340,63 @@ module Recipes
     rake 'db:migrate'
   end
 
-  def default
+  def minimum
     cook :git_init
-    cook :setup_spring
-    cook :disable_generators
-    cook :git_ignore_ide_files
     cook :replace_gemfile
     cook :reset_routes
-    cook :direnv
     cook :config_db
-    cook :add_ruby_version_to_gemfile
-    cook :rubocop
-    cook :tasks_extras
-    cook :single_line_logs_with_lograge
+
     cook :timezone_brasilia
     cook :default_locale_br
     cook :brazillian_inflections
+    cook :disable_generators
+
+    cook :setup_js
+    cook :setup_css
+
+    cook :direnv
+    cook :setup_spring
+
+    :skip_commit
+  end
+
+  def default
+    cook :minimum
+
+    cook :git_ignore_ide_files
+    cook :add_ruby_version_to_gemfile
+    cook :single_line_logs_with_lograge
     cook :raise_unpermitted_parameters_on_dev
     cook :local_mailer
+    # cook :disable_include_all_helpers
+
+    cook :heroku
+    cook :rubocop
+    cook :tasks_extras
     cook :editors_config_files
+
     cook :layout_head_metatags
     cook :layout_bootstrap_container
     cook :layout_add_space_between_js_and_css
-    cook :heroku
-    cook :pagination_with_kaminari_gem
-    cook :simple_form_bootstrap
-    cook :setup_js
-    cook :setup_css
-    cook :bootstrap
+    cook :layout_flash_messages
     cook :nprogress_rails
+
+    cook :simple_form_bootstrap
+    cook :bootstrap
+    cook :scaffold_bootstrap_template
+
+    cook :inherited_resources
+    cook :pagination_with_kaminari
+
+    cook :devise_config
+    cook :devise_user
+    cook :seeds
+
+    # cook :helper_simple_form
+
+    cook :guard_livereload
     cook :overcommit_setup
+
     :skip_commit
   end
 end

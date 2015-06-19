@@ -3,7 +3,7 @@ ruby '2.2.2'
 
 # DEFAULT RAILS GEMS
 
-gem 'rails', '4.2.1'
+gem 'rails', '4.2.2'
 gem 'jquery-rails'
 gem 'turbolinks'
 gem 'sass-rails', '~> 5.0'
@@ -46,10 +46,12 @@ gem 'simple_form'
 
 # gem 'gravatarify'
 # gem 'jquery-ui-rails'
+# gem 'activerecord-import'
 
 group :development, :test do
   gem 'mysql2'
   gem 'faker'
+  # gem 'seedbank'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug'
   # Access an IRB console on exception pages or by using <%= console %> in views
@@ -76,6 +78,7 @@ group :console do
   # gem 'brakeman'
   # gem 'overcommit'
   # gem 'rails_best_practices'
+  # gem 'guard'
   # gem 'guard-livereload'
 
   # gem 'pry-doc'
