@@ -8,7 +8,7 @@ gem 'jquery-rails'
 gem 'turbolinks'
 gem 'sass-rails', '~> 5.0'
 gem 'coffee-rails', '~> 4.1.0'
-# gem 'rails-i18n'
+gem 'rails-i18n'
 # gem 'uglifier', '>= 1.3.0'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
@@ -25,7 +25,7 @@ gem 'slim-rails'
 # gem 'active_link_to'
 
 gem 'simple_form'
-# gem 'bootstrap-sass'
+gem 'bootstrap-sass'
 # gem 'bootstrap_flash_messages'
 # gem 'bootstrap_tokenfield_rails'
 # gem 'bootstrap-wysihtml5-rails'
@@ -47,11 +47,13 @@ gem 'simple_form'
 # gem 'gravatarify'
 # gem 'jquery-ui-rails'
 # gem 'activerecord-import'
+# gem 'csv-importer'
 
 group :development, :test do
   gem 'mysql2'
   gem 'faker'
   # gem 'seedbank'
+  # gem 'seed-fu'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug'
   # Access an IRB console on exception pages or by using <%= console %> in views

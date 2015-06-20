@@ -1,1 +1,5 @@
-InheritedResources::Base.include InheritedResourcesDefaults
+module InheritedResources
+  class Base
+    include InheritedResourcesDefaults
+  end
+end

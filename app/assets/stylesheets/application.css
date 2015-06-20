@@ -2,3 +2,5 @@
  *= require bootstrap-sass
  *= require_tree .
  */
+
+#env-dev body { border-top: 1px dashed red; }

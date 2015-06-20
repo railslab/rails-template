@@ -6,3 +6,7 @@ cd rails_template
 
 # exibir as receitas existentes
 rt help
+
+# exemplos para copiar e criar plugins
+https://github.com/xdite/bootstrap-helper
+# https://github.com/decioferreira/bootstrap-generators

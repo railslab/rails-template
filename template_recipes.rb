@@ -79,7 +79,7 @@ module Recipes
   # configurar database.yml para mysql, perguntando o nome do banco para ser criado
   def config_db
     mirror 'config/database.yml'
-    database_name = ask 'database name?'
+    database_name = 'test' #ask 'database name?'
     gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
   end
 
@@ -163,10 +163,18 @@ module Recipes
                      before: /^\s+<%= yield %>/
   end
 
+  def layout_env_dev
+    gsub_file 'app/views/layouts/application.html.erb',
+              '<html>',
+              %q(<html<%== ' id="env-dev"' if Rails.env.development? %>>)
+    append_to_file 'app/assets/stylesheets/application.css',
+                   "#env-dev body { border-top: 1px dashed red; }\n"
+  end
+
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#use-postgres
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#webserver
-  def heroku(server = nil)
+  def heroku(server = 'puma') # set server to nil to enable ask during cook
     server ||= yes?('Server: (ENTER)Puma (default), (Y)Unicorn') ? 'unicorn' : 'puma'
 
     enable_gem 'rails_12factor', :production
@@ -313,6 +321,8 @@ module Recipes
 
   def scaffold_bootstrap_template
     directory 'lib/templates/slim/scaffold'
+    append_to_file 'app/assets/stylesheets/application.css',
+                   "body { margin-top: 20px; }\n"
   end
 
   # instalar overcommit por ultimo para nao atrapalhar os commits de cada cook
@@ -379,6 +389,7 @@ module Recipes
     cook :layout_bootstrap_container
     cook :layout_add_space_between_js_and_css
     cook :layout_flash_messages
+    cook :layout_env_dev
     cook :nprogress_rails
 
     cook :simple_form_bootstrap
@@ -398,5 +409,27 @@ module Recipes
     cook :overcommit_setup
 
     :skip_commit
+  end
+
+  def evernote
+    cook :minimum
+
+    cook :layout_bootstrap_container
+    cook :layout_add_space_between_js_and_css
+    cook :layout_flash_messages
+
+    cook :simple_form_bootstrap
+    cook :bootstrap
+    cook :scaffold_bootstrap_template
+
+    cook :heroku
+    cook :nprogress_rails
+
+    cook :inherited_resources
+    cook :pagination_with_kaminari
+
+    cook :devise_config
+    cook :devise_user
+    cook :seeds
   end
 end
