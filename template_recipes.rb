@@ -350,7 +350,8 @@ module Recipes
     rake 'db:migrate'
   end
 
-  def minimum
+  # recipe required on every rails project
+  def recipe_minimum
     cook :git_init
     cook :replace_gemfile
     cook :reset_routes
@@ -364,14 +365,11 @@ module Recipes
     cook :setup_js
     cook :setup_css
 
-    cook :direnv
-    cook :setup_spring
-
     :skip_commit
   end
 
-  def default
-    cook :minimum
+  def recipe_default
+    cook :recipe_minimum
 
     cook :git_ignore_ide_files
     cook :add_ruby_version_to_gemfile
@@ -392,6 +390,9 @@ module Recipes
     cook :layout_env_dev
     cook :nprogress_rails
 
+    cook :direnv
+    cook :setup_spring
+
     cook :simple_form_bootstrap
     cook :bootstrap
     cook :scaffold_bootstrap_template
@@ -411,8 +412,8 @@ module Recipes
     :skip_commit
   end
 
-  def evernote
-    cook :minimum
+  def recipe_evernote
+    cook :recipe_minimum
 
     cook :layout_bootstrap_container
     cook :layout_add_space_between_js_and_css
