@@ -62,12 +62,20 @@ module Helpers
   def append_require_css(name)
     insert_into_file 'app/assets/stylesheets/application.css',
                      " *= require #{name}\n",
-                     before: ' *= require_tree .'
+                     before: or_rx(' *= require_tree .', ' *= require_self')
   end
 
   def append_require_js(name)
     insert_into_file 'app/assets/javascripts/application.js',
                      "//= require #{name}\n",
-                     before: '//= require_tree .'
+                     before: or_rx('//= require_tree .', '//= require_self')
+  end
+
+  private
+  def or_rx(*args)
+    rx = args.map &Regexp.method(:escape)
+    rx = rx.map {|r| "(#{r})"}
+    rx = rx.join('|')
+    Regexp.new(rx)
   end
 end

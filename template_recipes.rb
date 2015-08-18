@@ -26,23 +26,6 @@ module Recipes
     git :init
   end
 
-  # instalar spring para acelerar rails console e rake
-  def setup_spring
-    run 'spring binstub --all'
-  end
-
-  def disable_generators
-    application <<-EOF.strip_heredoc
-      config.generators do |g|
-            g.assets false
-            g.helper false
-            g.javascripts false
-            g.stylesheets false
-            g.test_framework false
-          end
-    EOF
-  end
-
   # ignorar arquivos de configuração de IDEs
   def git_ignore_ide_files
     git_ignore '/.idea/', '*.sublime-workspace'
@@ -51,6 +34,19 @@ module Recipes
   # utilizar Gemfile com várias gems comentadas
   def replace_gemfile
     mirror 'Gemfile'
+  end
+
+  def slim
+    enable_gem 'slim-rails'
+  end
+
+  def thin
+    enable_gem 'thin', :development
+  end
+
+  def comment_all_gems
+    comment_lines 'Gemfile', "gem '"
+    uncomment_lines 'Gemfile', "gem 'rails', '"
   end
 
   def reset_routes
@@ -76,8 +72,15 @@ module Recipes
     run 'direnv allow .'
   end
 
+  # instalar spring para acelerar rails console e rake
+  def setup_spring
+    enable_gem 'spring', :development
+    run 'spring binstub --all'
+  end
+
   # configurar database.yml para mysql, perguntando o nome do banco para ser criado
   def config_db
+    enable_gem 'mysql2'
     mirror 'config/database.yml'
     database_name = 'test' #ask 'database name?'
     gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
@@ -85,7 +88,7 @@ module Recipes
 
   def add_ruby_version_to_gemfile
     version = run_capture 'rbenv global'
-    insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+\n/
+    insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+'\n/
   end
 
   def rubocop
@@ -114,6 +117,18 @@ module Recipes
 
   def brazillian_inflections
     mirror 'config/initializers/inflections.rb'
+  end
+
+  def disable_generators
+    application <<-EOF.strip_heredoc
+      config.generators do |g|
+            g.assets false
+            g.helper false
+            g.javascripts false
+            g.stylesheets false
+            g.test_framework false
+          end
+    EOF
   end
 
   def raise_unpermitted_parameters_on_dev
@@ -165,8 +180,8 @@ module Recipes
 
   def layout_env_dev
     gsub_file 'app/views/layouts/application.html.erb',
-              '<html>',
-              %q(<html<%== ' id="env-dev"' if Rails.env.development? %>>)
+              /<html(.*)>/,
+              %q(<html\1<%== ' id="env-dev"' if Rails.env.development? %>>)
     append_to_file 'app/assets/stylesheets/application.css',
                    "#env-dev body { border-top: 1px dashed red; }\n"
   end
@@ -177,6 +192,7 @@ module Recipes
   def heroku(server = 'puma') # set server to nil to enable ask during cook
     server ||= yes?('Server: (ENTER)Puma (default), (Y)Unicorn') ? 'unicorn' : 'puma'
 
+    enable_gem 'uglifier'
     enable_gem 'rails_12factor', :production
     enable_gem 'pg', :production
     enable_gem server, :production
@@ -256,8 +272,7 @@ module Recipes
 
   def inherited_resources
     enable_gem 'inherited_resources'
-    mirror 'app/controllers/concerns/inherited_resources_defaults.rb',
-           'config/initializers/inherited_resources.rb'
+    mirror 'app/controllers/concerns/inherited_resources_defaults.rb'
   end
 
   def pagination_with_kaminari
@@ -266,7 +281,7 @@ module Recipes
     # ou utilizar https://github.com/matenia/bootstrap-kaminari-views mas precisa especificar o tema.
     generate 'kaminari:views bootstrap3 -e slim'
     uncomment_lines 'app/controllers/concerns/inherited_resources_defaults.rb',
-                    'end_of_association_chain'
+                    'end_of_association_chain' rescue Errno::ENOENT
   end
 
   # apenas configura o devise, sem criar user
@@ -333,6 +348,10 @@ module Recipes
     run 'overcommit --install'
   end
 
+  def postmark
+
+  end
+
 # ======================================================================================================================
 
   # rota utilizada para debug e testes
@@ -356,6 +375,7 @@ module Recipes
     cook :replace_gemfile
     cook :reset_routes
     cook :config_db
+    cook :raise_unpermitted_parameters_on_dev
 
     cook :timezone_brasilia
     cook :default_locale_br
@@ -364,6 +384,10 @@ module Recipes
 
     cook :setup_js
     cook :setup_css
+
+    cook :thin
+    cook :slim
+    cook :heroku
 
     :skip_commit
   end
@@ -374,11 +398,9 @@ module Recipes
     cook :git_ignore_ide_files
     cook :add_ruby_version_to_gemfile
     cook :single_line_logs_with_lograge
-    cook :raise_unpermitted_parameters_on_dev
     cook :local_mailer
     # cook :disable_include_all_helpers
 
-    cook :heroku
     cook :rubocop
     cook :tasks_extras
     cook :editors_config_files
@@ -423,7 +445,6 @@ module Recipes
     cook :bootstrap
     cook :scaffold_bootstrap_template
 
-    cook :heroku
     cook :nprogress_rails
 
     cook :inherited_resources
