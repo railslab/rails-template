@@ -1,0 +1,3 @@
+# https://devcenter.heroku.com/articles/slug-compiler#slugignore
+/test
+/spec

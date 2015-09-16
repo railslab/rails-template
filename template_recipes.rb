@@ -3,12 +3,21 @@ require_relative './template_helpers'
 
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Style/RescueModifier
 module Recipes
   include Helpers
 
   def help
     puts Recipes.public_instance_methods(false)
   end
+  module_function :help
+
+  def interactive
+    Recipes.public_instance_methods(false).each do |recipe|
+      cook(recipe, ENV['COMMIT'].present?) if yes?(recipe)
+    end
+  end
+  module_function :interactive
 
   def cook(recipe, commit = true)
     say recipe, :green
@@ -24,6 +33,35 @@ module Recipes
   # apenas inicializar o repositório git
   def git_init
     git :init
+  end
+
+  def disable_generators
+    application <<-EOF.strip_heredoc
+      config.generators do |g|
+            g.assets false
+            g.helper false
+            g.javascripts false
+            g.stylesheets false
+            g.jbuilder false
+            # g.test_framework false
+          end
+    EOF
+  end
+
+  def rspec
+    enable_gem 'rspec-rails', [:development, :test]
+    enable_gem 'factory_girl_rails', [:development, :test]
+    enable_gem 'spring-commands-rspec', :development
+    enable_gem 'shoulda-matchers', :test
+    enable_gem 'simplecov', :console
+
+    generate 'rspec:install'
+    uncomment_lines 'spec/rails_helper.rb',
+                    "'spec/support/"
+    directory 'spec/support'
+    run 'bundle binstubs rspec-core'
+    create_file 'db/schema.rb', ''
+    append_to_file '.rspec', "--format documentation\n"
   end
 
   # ignorar arquivos de configuração de IDEs
@@ -73,7 +111,7 @@ module Recipes
   end
 
   # instalar spring para acelerar rails console e rake
-  def setup_spring
+  def spring
     enable_gem 'spring', :development
     run 'spring binstub --all'
   end
@@ -82,7 +120,7 @@ module Recipes
   def config_db
     enable_gem 'mysql2'
     mirror 'config/database.yml'
-    database_name = 'test' #ask 'database name?'
+    database_name = 'test' # ask 'database name?'
     gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
   end
 
@@ -92,6 +130,7 @@ module Recipes
   end
 
   def rubocop
+    enable_gem 'rubocop', :development
     mirror '.rubocop.yml',
            'bin/rubocop-precommit'
   end
@@ -117,18 +156,6 @@ module Recipes
 
   def brazillian_inflections
     mirror 'config/initializers/inflections.rb'
-  end
-
-  def disable_generators
-    application <<-EOF.strip_heredoc
-      config.generators do |g|
-            g.assets false
-            g.helper false
-            g.javascripts false
-            g.stylesheets false
-            g.test_framework false
-          end
-    EOF
   end
 
   def raise_unpermitted_parameters_on_dev
@@ -178,6 +205,7 @@ module Recipes
                      before: /^\s+<%= yield %>/
   end
 
+  # TODO: make it work with slim/haml
   def layout_env_dev
     gsub_file 'app/views/layouts/application.html.erb',
               /<html(.*)>/,
@@ -201,6 +229,19 @@ module Recipes
 
     args = server == 'puma' ? '-C' : '-p $PORT -c'
     create_file 'Procfile', "web: bundle exec #{server} #{args} config/#{server}.rb\n"
+
+    # https://devcenter.heroku.com/articles/slug-compiler#slugignore
+    mirror '.slugignore'
+  end
+
+  def heroku_config
+    # auto migrate after deploy
+    run %(heroku buildpacks:add https://github.com/gunpowderlabs/buildpack-ruby-rake-deploy-tasks)
+    run %(heroku config:set DEPLOY_TASKS='db:migrate cache:clear')
+
+    # do not install gems from console group
+    # https://blog.heroku.com/archives/2011/2/15/using-bundler-groups-on-heroku
+    run %(heroku config:add BUNDLE_WITHOUT="development:test:console")
   end
 
   def simple_form_bootstrap
@@ -253,10 +294,10 @@ module Recipes
     enable_gem 'sass-rails'
     enable_gem 'coffee-rails'
 
-    mirror 'app/assets/stylesheets/bootstrap-sass.css.scss',
+    mirror 'app/assets/stylesheets/bootstrap-imports.css.scss',
            'app/assets/stylesheets/bootstrap-custom.css'
 
-    append_require_css 'bootstrap-sass'
+    append_require_css 'bootstrap-imports'
     append_require_js 'bootstrap'
   end
 
@@ -308,7 +349,7 @@ module Recipes
     generate 'devise user' unless File.read('config/routes.rb').match('devise_for :users')
 
     uncomment_lines 'app/controllers/application_controller.rb',
-                     'before_action :authenticate_user!'
+                    'before_action :authenticate_user!'
 
     uncomment_lines 'app/controllers/concerns/inherited_resources_defaults.rb',
                     'begin_of_association_chain'
@@ -349,10 +390,9 @@ module Recipes
   end
 
   def postmark
-
   end
 
-# ======================================================================================================================
+  # ====================================================================================================================
 
   # rota utilizada para debug e testes
   def dev_route
@@ -413,7 +453,7 @@ module Recipes
     cook :nprogress_rails
 
     cook :direnv
-    cook :setup_spring
+    cook :spring
 
     cook :simple_form_bootstrap
     cook :bootstrap

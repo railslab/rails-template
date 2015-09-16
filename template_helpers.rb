@@ -59,6 +59,7 @@ module Helpers
     create_file file, content, &block
   end
 
+  # FIX is inserting both before require_tree|require_self
   def append_require_css(name)
     insert_into_file 'app/assets/stylesheets/application.css',
                      " *= require #{name}\n",
@@ -72,8 +73,13 @@ module Helpers
   end
 
   private
+
+  def file_exist?(path)
+    File.exist? relative_to_original_destination_root(path)
+  end
+
   def or_rx(*args)
-    rx = args.map &Regexp.method(:escape)
+    rx = args.map(&Regexp.method(:escape))
     rx = rx.map {|r| "(#{r})"}
     rx = rx.join('|')
     Regexp.new(rx)

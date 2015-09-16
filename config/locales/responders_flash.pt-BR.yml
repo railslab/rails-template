@@ -1,0 +1,10 @@
+pt-BR:
+  flash:
+    actions:
+      create:
+        notice: "Comando executado com sucesso!"
+      update:
+        notice: "Comando executado com sucesso!"
+      destroy:
+        notice: "Comando executado com sucesso!"
+        alert: "Comando não pôde ser executado!"

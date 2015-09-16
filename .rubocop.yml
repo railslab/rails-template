@@ -1,5 +1,5 @@
 AllCops:
-  RunRailsCops: false
+  RunRailsCops: true
   DisplayCopNames: true
   DisplayStyleGuide: true
   StyleGuideCopsOnly: false

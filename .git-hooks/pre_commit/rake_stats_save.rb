@@ -9,14 +9,13 @@ module Overcommit::Hook::PreCommit
     end
 
     private
+
     # não é possível modificar arquivos durante o pre-commit, pois os arquivos vão para o stash e voltam
     # https://github.com/brigade/overcommit/issues/214#issuecomment-103974519
     # utilizar o hack abaixo para contornar este problema
     def fix_stash
       execute %w(git stash pop --index --quiet)
-      ret = yield
-      execute %w(git stash save --keep-index --quiet)
-      return ret
+      yield.tap { execute %w(git stash save --keep-index --quiet) }
     end
   end
 end

@@ -22,4 +22,4 @@ development:
 
 test:
   <<: *sqlite
-  database: db/test.sqlite3
+  database: ":memory:"
