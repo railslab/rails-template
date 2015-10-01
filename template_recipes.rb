@@ -62,6 +62,7 @@ module Recipes
     run 'bundle binstubs rspec-core'
     create_file 'db/schema.rb', ''
     append_to_file '.rspec', "--format documentation\n"
+    run 'spring binstub rspec'
   end
 
   # ignorar arquivos de configuração de IDEs
@@ -210,8 +211,15 @@ module Recipes
     gsub_file 'app/views/layouts/application.html.erb',
               /<html(.*)>/,
               %q(<html\1<%== ' id="env-dev"' if Rails.env.development? %>>)
-    append_to_file 'app/assets/stylesheets/application.css',
-                   "#env-dev body { border-top: 1px dashed red; }\n"
+    append_to_file 'app/assets/stylesheets/application.css' do
+      %(
+/* force chrome to redraw when out of focus, so livereload can update the css */
+@-webkit-keyframes repaintChrome {from { padding: 0; } to { padding: 0; }}
+#env-dev { -webkit-animation: repaintChrome infinite 1s; }
+/* show a red dotted border on top only on dev env */
+#env-dev body { outline: red dotted thin; border-top: 1px solid red; }
+       )
+    end
   end
 
   # https://devcenter.heroku.com/articles/getting-started-with-rails4#heroku-gems
@@ -232,16 +240,7 @@ module Recipes
 
     # https://devcenter.heroku.com/articles/slug-compiler#slugignore
     mirror '.slugignore'
-  end
-
-  def heroku_config
-    # auto migrate after deploy
-    run %(heroku buildpacks:add https://github.com/gunpowderlabs/buildpack-ruby-rake-deploy-tasks)
-    run %(heroku config:set DEPLOY_TASKS='db:migrate cache:clear')
-
-    # do not install gems from console group
-    # https://blog.heroku.com/archives/2011/2/15/using-bundler-groups-on-heroku
-    run %(heroku config:add BUNDLE_WITHOUT="development:test:console")
+    mirror 'bin/heroku-config'
   end
 
   def simple_form_bootstrap
@@ -363,10 +362,37 @@ module Recipes
     mirror 'app/helpers/simple_form_helper.rb'
   end
 
-  def guard_livereload
+  def guard
     enable_gem 'guard', :console
+    enable_gem 'guard-rails', :console
+    enable_gem 'guard-rspec', :console
+    enable_gem 'guard-bundler', :console
     enable_gem 'guard-livereload', :console
+
+    enable_gem 'rack-livereload', :development
+    dev 'config.middleware.insert_after ActionDispatch::Static, Rack::LiveReload, no_swf: true'
+
+    run 'bundle binstubs guard'
     run 'guard init livereload'
+    run 'guard init rspec'
+    run 'guard init rails'
+    run 'guard init bundler'
+
+    gsub_file 'Guardfile',
+              '"bundle exec rspec"',
+              '"bin/rspec"'
+
+    insert_into_file 'Guardfile',
+                     "  ignore %r{lib/forgery}\n",
+                     after: "guard 'rails' do\n"
+
+    insert_into_file 'Guardfile',
+                     "  ignore %r{config/routes.rb}\n",
+                     after: "guard 'rails' do\n"
+
+    insert_into_file 'Guardfile',
+                     "  ignore %r{config/locales}\n",
+                     after: "guard 'rails' do\n"
   end
 
   # rake db:seeds:development:users
@@ -468,7 +494,7 @@ module Recipes
 
     # cook :helper_simple_form
 
-    cook :guard_livereload
+    cook :guard
     cook :overcommit_setup
 
     :skip_commit

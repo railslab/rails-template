@@ -11,3 +11,28 @@ rt help
 https://github.com/xdite/bootstrap-helper
 https://github.com/decioferreira/bootstrap-generators
 https://github.com/doabit/bootstrap-sass-extras
+
+# Advanced ActiveRecord
+http://blog.codeship.com/speed-up-activerecord/?utm_source=rubyweekly&utm_medium=email
+http://jpospisil.com/2014/06/16/the-definitive-guide-to-arel-the-sql-manager-for-ruby.html
+
+# Local RubyGems
+https://www.npmjs.com/package/reginabox
+
+# Service Objects
+http://brewhouse.io/blog/2014/04/30/gourmet-service-objects.html
+
+# Guides
+http://idiosyncratic-ruby.com/20-better-standards.html
+
+# Wizard Controller
+https://github.com/schneems/wicked
+
+# Other Gems
+https://www.quora.com/What-are-the-most-useful-gems-to-use-in-Rails
+
+# Fixing Encoding
+http://www.justinweiss.com/blog/2015/09/15/3-steps-to-fix-encoding-problems-in-ruby/
+
+# Timezone
+http://www.elabs.se/blog/36-working-with-time-zones-in-ruby-on-rails

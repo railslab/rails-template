@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -v
+
+heroku buildpacks:clear
+heroku buildpacks:add 'https://github.com/heroku/heroku-buildpack-ruby'
+heroku buildpacks:add 'https://github.com/gunpowderlabs/buildpack-ruby-rake-deploy-tasks'
+heroku config:set DEPLOY_TASKS='db:migrate log:clear tmp:clear'
+
+# do not install gems from console group
+# https://blog.heroku.com/archives/2011/2/15/using-bundler-groups-on-heroku
+heroku config:set BUNDLE_WITHOUT="development:test:console"
