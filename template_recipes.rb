@@ -468,13 +468,6 @@ module Recipes
     # “From” email: contato@qi64.com
   end
 
-  def wwwhisper
-    run 'heroku addons:create wwwhisper:starter'
-    enable_gem 'rack-wwwhisper', :production
-    pro "config.middleware.insert 0, 'Rack::WWWhisper'"
-    say 'Add other user at: https://*.herokuapp.com/wwwhisper/admin/'
-  end
-
   # ====================================================================================================================
 
   # rota utilizada para debug e testes
