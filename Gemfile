@@ -4,7 +4,7 @@ ruby '2.2.3'
 # DEFAULT RAILS GEMS
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.4'
+gem 'rails', '4.2.5'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0' # replace with https://github.com/sass/sassc-rails
 # Use Uglifier as compressor for JavaScript assets
