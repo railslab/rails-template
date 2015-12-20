@@ -10,3 +10,6 @@ heroku config:set DEPLOY_TASKS='db:migrate log:clear tmp:clear'
 # do not install gems from console group
 # https://blog.heroku.com/archives/2011/2/15/using-bundler-groups-on-heroku
 heroku config:set BUNDLE_WITHOUT="development:test:console"
+# set host used by config.action_mailer.default_url_options[:host]
+heroku config:set HOST=$(heroku domains | head -n 2 | tail -n 1)
+heroku config:set MAILER_SENDER='contato@qi64.com'

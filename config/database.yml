@@ -12,7 +12,7 @@ mysql: &mysql
 
 pg: &pg
   adapter: postgresql
-  host: 192.168.59.103
+  host: 127.0.0.1
   username: postgres
   password: password
   encoding: unicode

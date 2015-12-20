@@ -25,7 +25,7 @@ module Recipes
     return if response == :skip_commit
     return unless commit
 
-    msg = recipe.to_s.tr '_', ' '
+    msg = recipe.to_s.capitalize.tr '_', ' '
     git_add_commit msg
   end
   module_function :cook
@@ -33,6 +33,11 @@ module Recipes
   # apenas inicializar o repositório git
   def git_init
     git :init
+  end
+
+  def add_ruby_version_to_gemfile
+    version = run_capture 'rbenv global'
+    insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+'\n/
   end
 
   def disable_generators
@@ -48,26 +53,24 @@ module Recipes
     EOF
   end
 
-  def rspec
-    enable_gem 'rspec-rails', [:development, :test]
-    enable_gem 'factory_girl_rails', [:development, :test]
-    enable_gem 'spring-commands-rspec', :development
-    enable_gem 'shoulda-matchers', :test
-    enable_gem 'simplecov', :console
-
-    generate 'rspec:install'
-    uncomment_lines 'spec/rails_helper.rb',
-                    "'spec/support/"
-    directory 'spec/support'
-    run 'bundle binstubs rspec-core'
-    create_file 'db/schema.rb', ''
-    append_to_file '.rspec', "--format documentation\n"
-    run 'spring binstub rspec'
+  def timezone_brasilia
+    application "config.time_zone = 'Brasilia'"
   end
 
   # ignorar arquivos de configuração de IDEs
   def git_ignore_ide_files
     git_ignore '/.idea/', '*.sublime-workspace'
+  end
+
+  def raise_unpermitted_parameters_on_dev
+    dev 'config.action_controller.action_on_unpermitted_parameters = :raise'
+  end
+
+  def editors_config_files
+    mirror '.editorconfig'
+    copy_file 'rails.sublime-project',
+              "#{project_name}.sublime-project",
+              force: true, mode: :preserve
   end
 
   # utilizar Gemfile com várias gems comentadas
@@ -91,6 +94,7 @@ module Recipes
   def reset_routes
     replace_file 'config/routes.rb', <<-EOF.strip_heredoc
       Rails.application.routes.draw do
+        root to: proc { [200, {}, [Rails.version]] }
       end
     EOF
   end
@@ -117,21 +121,23 @@ module Recipes
     run 'spring binstub --all'
   end
 
+  def add_groups_to_gemfile
+    gem_group(:test) {}
+    gem_group(:production) {}
+    gem_group(:console) {}
+    gem_group(:heroku) {}
+  end
+
   # configurar database.yml para mysql, perguntando o nome do banco para ser criado
   def config_db
     enable_gem 'mysql2'
     mirror 'config/database.yml'
-    database_name = 'test' # ask 'database name?'
+    database_name = project_name # ask 'database name?'
     gsub_file 'config/database.yml', /database: test/, "database: #{database_name}"
   end
 
-  def add_ruby_version_to_gemfile
-    version = run_capture 'rbenv global'
-    insert_into_file 'Gemfile', "ruby '#{version}'", after: /source .+'\n/
-  end
-
   def rubocop
-    enable_gem 'rubocop', :development
+    enable_gem 'rubocop', :console
     mirror '.rubocop.yml',
            'bin/rubocop-precommit'
   end
@@ -145,10 +151,6 @@ module Recipes
     application 'config.lograge.enabled = true'
   end
 
-  def timezone_brasilia
-    application "config.time_zone = 'Brasilia'"
-  end
-
   def default_locale_br
     enable_gem 'rails-i18n'
     application "config.i18n.default_locale = :'pt-BR'"
@@ -159,12 +161,11 @@ module Recipes
     mirror 'config/initializers/inflections.rb'
   end
 
-  def raise_unpermitted_parameters_on_dev
-    dev 'config.action_controller.action_on_unpermitted_parameters = :raise'
-  end
-
-  def local_mailer
+  def mailer
     dev "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }"
+    pro "config.action_mailer.default_url_options = { host: Rails.application.secrets.host }"
+    append_secret_production_env 'host'
+    append_secret_production_env 'mailer_sender'
   end
 
   # impede que um helper de um controller seja carregado em outro
@@ -173,9 +174,26 @@ module Recipes
     application 'config.action_controller.include_all_helpers = false'
   end
 
-  def editors_config_files
-    mirror '.editorconfig',
-           'rails.sublime-project'
+  def pry_dev
+    enable_gem 'pry-rails', [:development, :test]
+    enable_gem 'did_you_mean', :development
+  end
+
+  def rspec
+    enable_gem 'rspec-rails', [:development, :test]
+    enable_gem 'factory_girl_rails', [:development, :test]
+    enable_gem 'spring-commands-rspec', :development
+    enable_gem 'shoulda-matchers', :test
+    enable_gem 'simplecov', :console
+
+    generate 'rspec:install'
+    uncomment_lines 'spec/rails_helper.rb',
+                    "'spec/support/"
+    directory 'spec/support'
+    run 'bundle binstubs rspec-core'
+    create_file 'db/schema.rb', ''
+    append_to_file '.rspec', "--format documentation\n"
+    run 'spring binstub rspec'
   end
 
   # https://gist.github.com/kevinSuttle/1997924
@@ -238,29 +256,16 @@ module Recipes
     args = server == 'puma' ? '-C' : '-p $PORT -c'
     create_file 'Procfile', "web: bundle exec #{server} #{args} config/#{server}.rb\n"
 
+    # ignore on heroku folders not used for production, like /test and /spec
     # https://devcenter.heroku.com/articles/slug-compiler#slugignore
     mirror '.slugignore'
     mirror 'bin/heroku-config'
-  end
-
-  def simple_form_bootstrap
-    enable_gem 'simple_form'
-    generate 'simple_form:install --bootstrap'
-
-    # smaller label form size, from 3 to 2.
-    gsub_file 'config/initializers/simple_form_bootstrap.rb',
-              'col-sm-9',
-              'col-sm-10'
-
-    gsub_file 'config/initializers/simple_form_bootstrap.rb',
-              'col-sm-3',
-              'col-sm-2'
-
-    gsub_file 'config/initializers/simple_form_bootstrap.rb',
-              'col-sm-offset-3',
-              'col-sm-offset-2'
-
-    mirror 'config/locales/simple_form.pt-BR.yml'
+    # Add sample route
+    route 'root to: proc { [200, {}, [Rails.version]] }'
+    # disable sqlite
+    comment_lines 'Gemfile', "gem 'sqlite3'"
+    # TODO move sqlite to group dev/test
+    add_ruby_version_to_gemfile # heroku requires ruby version on Gemfile
   end
 
   # utilizar application.js apenas para as diretivas do sprockets
@@ -300,6 +305,26 @@ module Recipes
     append_require_js 'bootstrap'
   end
 
+  def simple_form_bootstrap
+    enable_gem 'simple_form'
+    generate 'simple_form:install --bootstrap'
+
+    # smaller label form size, from 3 to 2.
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-9',
+              'col-sm-10'
+
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-3',
+              'col-sm-2'
+
+    gsub_file 'config/initializers/simple_form_bootstrap.rb',
+              'col-sm-offset-3',
+              'col-sm-offset-2'
+
+    mirror 'config/locales/simple_form.pt-BR.yml'
+  end
+
   def nprogress_rails
     enable_gem 'nprogress-rails'
 
@@ -318,6 +343,9 @@ module Recipes
   def pagination_with_kaminari
     enable_gem 'kaminari'
     enable_gem 'kaminari-i18n'
+
+    bundle
+
     # ou utilizar https://github.com/matenia/bootstrap-kaminari-views mas precisa especificar o tema.
     generate 'kaminari:views bootstrap3 -e slim'
     uncomment_lines 'app/controllers/concerns/inherited_resources_defaults.rb',
@@ -331,6 +359,8 @@ module Recipes
     enable_gem 'devise-i18n-views'
     enable_gem 'devise-bootstrap-views'
 
+    bundle
+
     generate 'devise:install'
 
     gsub_file 'config/initializers/devise.rb',
@@ -342,6 +372,10 @@ module Recipes
                      after: "::Base\n"
 
     mirror 'app/views/layouts/devise.html.slim'
+
+    gsub_file 'config/initializers/devise.rb',
+              /config\.mailer_sender = '.*'/,
+              "config.mailer_sender = Rails.application.secrets.mailer_sender"
   end
 
   def devise_user
@@ -408,7 +442,7 @@ module Recipes
   end
 
   # instalar overcommit por ultimo para nao atrapalhar os commits de cada cook
-  def overcommit_setup
+  def overcommit
     enable_gem 'overcommit', :console
     mirror '.overcommit.yml'
     directory '.git-hooks'
@@ -416,6 +450,29 @@ module Recipes
   end
 
   def postmark
+    enable_gem 'postmark-rails', :production
+
+    pro 'config.action_mailer.delivery_method = :postmark'
+
+    pro 'config.action_mailer.postmark_settings = {
+    api_token: Rails.application.secrets.postmark_api_token
+  }'
+
+    append_secret_production_env 'postmark_api_token'
+
+    run 'heroku addons:create postmark:10k'
+    run 'heroku addons:open postmark'
+
+    # Configurar postmark Sender Signature utilizando os seguintes dados:
+    # Full Name: Não Responder
+    # “From” email: contato@qi64.com
+  end
+
+  def wwwhisper
+    run 'heroku addons:create wwwhisper:starter'
+    enable_gem 'rack-wwwhisper', :production
+    pro "config.middleware.insert 0, 'Rack::WWWhisper'"
+    say 'Add other user at: https://*.herokuapp.com/wwwhisper/admin/'
   end
 
   # ====================================================================================================================

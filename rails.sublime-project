@@ -3,7 +3,7 @@
   [
     {
       "path": ".",
-      "folder_exclude_patterns": ["tmp", "log", ".idea"],
+      "folder_exclude_patterns": ["tmp", "log", ".idea", "node_modules"],
       "follow_symlinks": true
     }
   ],

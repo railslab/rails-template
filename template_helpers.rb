@@ -48,10 +48,25 @@ module Helpers
     uncomment_lines 'Gemfile', gem_name
     return if File.read('Gemfile').match gem_name
     if group
-      gem name, group: group
+      prepend_gem_group name, group
     else
-      gem name
+      append_gem name
     end
+  end
+
+  def prepend_gem_group(name, group)
+    groups = [group].flatten.map(&:inspect).join(', ')
+    insert_into_file 'Gemfile',
+                     "  gem '#{name}'\n",
+                     after: "group #{groups} do\n"
+  end
+
+  def append_gem(name)
+    append_file 'Gemfile', "gem '#{name}'\n"
+  end
+
+  def add_eof(file)
+    append_file file, "\n", force: true
   end
 
   def replace_file(file, content, &block)
@@ -72,7 +87,27 @@ module Helpers
                      before: or_rx('//= require_tree .', '//= require_self')
   end
 
+  def append_secret_production(var, key)
+    append_file 'config/secrets.yml', "  #{var}: #{key}\n"
+  end
+
+  def append_secret_production_env(key)
+    append_secret_production(key, "<%= ENV['#{key.upcase}'] %>")
+  end
+
+  def bundle
+    inside Rails.root do
+      Bundler.with_clean_env do
+        run 'bundle install'
+      end
+    end
+  end
+
   private
+
+  def project_name
+    Rails.application.class.parent_name.underscore
+  end
 
   def file_exist?(path)
     File.exist? relative_to_original_destination_root(path)
